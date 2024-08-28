@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>牧羊小豆子-電話號碼處理器</title>
+    <style>
+      textarea {
+        width: 100%;
+        height: 100px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+      }
+      .result,
+      .invalid-numbers,
+      .duplicates {
+        color: #333;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+      }
+      .invalid-numbers {
+        color: red;
+      }
+      .duplicates {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>牧羊小豆子-電話號碼處理器</h1>
+    <textarea
+      id="phoneNumbers"
+      placeholder="批量輸入需要處理的電話號碼，例如 +886987127017,+886937896977,, +886926215956, +886926215956,+886937896977,+886976651219,+886935722698,+886935722698, +886933885313,+886970797469,+886982082354,+886986139339，我將為你更改"
+    ></textarea>
+    <br /><br />
+    <button onclick="processPhoneNumbers()">處理電話號碼</button>
+    <h2>結果：</h2>
+    <p class="result" id="result"></p>
+    <p class="duplicates" id="duplicateNumbers"></p>
+    <p class="invalid-numbers" id="invalidNumbers"></p>
+    <p class="result" id="stats"></p>
+
+    <script>
+      function processPhoneNumbers() {
+        // 獲取輸入的電話號碼，並移除所有空格
+        let input = document
+          .getElementById("phoneNumbers")
+          .value.replace(/\s+/g, "");
+
+        // 系統自動斷開電話號碼
+        let phoneNumbers = input.split(",");
+
+        // 用來存儲符合格式的號碼和不符合格式的號碼
+        let validNumbers = [];
+        let invalidNumbers = [];
+        let duplicates = {};
+
+        // 正則表達式匹配正確格式的電話號碼 (+886 加上9位數字)
+        const taiwanPhoneRegex = /^\+886\d{9}$/;
+
+        // 檢查每個號碼是否符合格式
+        phoneNumbers.forEach((number) => {
+          if (taiwanPhoneRegex.test(number)) {
+            let localNumber = number.replace("+886", "0");
+            // 檢查是否為重複號碼，並統計重複次數
+            if (validNumbers.includes(localNumber)) {
+              duplicates[localNumber] = (duplicates[localNumber] || 1) + 1;
+            } else {
+              validNumbers.push(localNumber);
+            }
+          } else if (number) {
+            // 非空號碼但格式不正確的，加入無效號碼陣列
+            invalidNumbers.push(number);
+          }
+        });
+
+        // 顯示結果
+        document.getElementById("result").innerText = validNumbers.join(",");
+
+        // 顯示重複號碼及其重複次數
+        let duplicateText = "";
+        for (let number in duplicates) {
+          duplicateText += `${number} 重複 ${duplicates[number]} 次\n`;
+        }
+        document.getElementById("duplicateNumbers").innerText = duplicateText
+          ? `重複號碼:\n${duplicateText}`
+          : "";
+
+        // 顯示無效號碼
+        document.getElementById("invalidNumbers").innerText =
+          invalidNumbers.length > 0
+            ? "無法轉換的號碼: " + invalidNumbers.join(",")
+            : "";
+
+        // 顯示有效電話號碼的總數
+        document.getElementById(
+          "stats"
+        ).innerText = `總共 ${validNumbers.length} 個有效電話號碼。`;
+      }
+    </script>
+  </body>
+</html>
